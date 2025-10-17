@@ -420,3 +420,46 @@ export function getTopQuestions(limit: number = 4): PredefinedQuestion[] {
     .sort((a, b) => a.priority - b.priority)
     .slice(0, limit)
 }
+
+// Get contextual questions based on last asked question or rotation
+// Returns ALL 10 questions, but sorted intelligently
+export function getContextualQuestions(
+  lastAskedQuestionId: string | null,
+  responseIndex: number = 0
+): PredefinedQuestion[] {
+  // Strategy 1: If we have a last question, prioritize same category
+  if (lastAskedQuestionId) {
+    const lastQuestion = getQuestionById(lastAskedQuestionId)
+
+    if (lastQuestion) {
+      // Get questions from same category, excluding the one just asked
+      const sameCategoryQuestions = predefinedQuestions
+        .filter(q => q.category === lastQuestion.category && q.id !== lastAskedQuestionId)
+        .sort((a, b) => a.priority - b.priority)
+
+      // Get questions from other categories
+      const otherCategoryQuestions = predefinedQuestions
+        .filter(q => q.category !== lastQuestion.category)
+        .sort((a, b) => a.priority - b.priority)
+
+      // Return all questions with same category first
+      return [...sameCategoryQuestions, ...otherCategoryQuestions]
+    }
+  }
+
+  // Strategy 2: Rotate through different orderings
+  // Shift the array based on response index to show variety
+  const rotationOffset = (responseIndex * 3) % predefinedQuestions.length
+
+  return [
+    ...predefinedQuestions.slice(rotationOffset),
+    ...predefinedQuestions.slice(0, rotationOffset)
+  ]
+}
+
+// Get questions by multiple categories
+export function getQuestionsByCategories(categories: QuestionCategory[]): PredefinedQuestion[] {
+  return predefinedQuestions
+    .filter(q => categories.includes(q.category))
+    .sort((a, b) => a.priority - b.priority)
+}

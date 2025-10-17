@@ -18,13 +18,16 @@ import {
   ExpandableChatFooter,
 } from "@/components/ui/expandable-chat"
 import { ChatMessageList } from "@/components/ui/chat-message-list"
-import { SuggestionChips, InlineSuggestionChips } from "@/components/ui/suggestion-chips"
+import { SuggestionChips } from "@/components/ui/suggestion-chips"
+import { CompactSuggestionChips } from "@/components/ui/compact-suggestion-chips"
 import { EnhancedMessage } from "@/components/ui/enhanced-message"
-import { PredefinedQuestion } from "@/lib/predefined-questions"
+import { PredefinedQuestion, getContextualQuestions } from "@/lib/predefined-questions"
 
 export function ExpandableChatDemo() {
   const [input, setInput] = useState("")
   const [showSuggestions, setShowSuggestions] = useState(true)
+  const [lastQuestionId, setLastQuestionId] = useState<string | null>(null)
+  const [responseCount, setResponseCount] = useState(0)
 
   const { messages, sendMessage, status, error, setMessages } = useChat({
     messages: [
@@ -44,6 +47,8 @@ export function ExpandableChatDemo() {
     },
     onFinish: (result) => {
       console.log('[Chat] Message finished:', result.message?.id)
+      // Increment response count for rotating suggestions
+      setResponseCount(prev => prev + 1)
     },
   })
 
@@ -61,6 +66,8 @@ export function ExpandableChatDemo() {
   }
 
   const handleQuestionSelect = (question: PredefinedQuestion) => {
+    // Track which question was asked for contextual suggestions
+    setLastQuestionId(question.id)
     // Send the selected question as a message
     sendMessage({ text: question.question })
     setShowSuggestions(false) // Hide suggestions after selection
@@ -89,6 +96,8 @@ export function ExpandableChatDemo() {
       },
     ])
     setShowSuggestions(true) // Show suggestions again on reset
+    setLastQuestionId(null) // Reset last question tracking
+    setResponseCount(0) // Reset response count
   }
 
   return (
@@ -180,12 +189,12 @@ export function ExpandableChatDemo() {
                     </ChatBubbleMessage>
                   </ChatBubble>
 
-                  {/* Show inline quick questions after each assistant message */}
-                  {variant === "received" && (
+                  {/* Show compact expandable quick questions after each assistant message (excluding welcome) */}
+                  {variant === "received" && message.id !== 'welcome' && (
                     <div className="px-4 pb-2">
-                      <InlineSuggestionChips
+                      <CompactSuggestionChips
+                        questions={getContextualQuestions(lastQuestionId, responseCount)}
                         onQuestionSelect={handleQuestionSelect}
-                        limit={3}
                       />
                     </div>
                   )}
