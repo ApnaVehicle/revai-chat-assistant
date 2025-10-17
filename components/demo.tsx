@@ -1,6 +1,6 @@
 "use client"
 
-import { FormEvent, useState } from "react"
+import React, { FormEvent, useState } from "react"
 import { useChat } from "@ai-sdk/react"
 import { Paperclip, Mic, Send, RotateCcw } from "lucide-react"
 import { RobotIcon } from "@/components/ui/robot-icon"
@@ -18,11 +18,15 @@ import {
   ExpandableChatFooter,
 } from "@/components/ui/expandable-chat"
 import { ChatMessageList } from "@/components/ui/chat-message-list"
+import { SuggestionChips, InlineSuggestionChips } from "@/components/ui/suggestion-chips"
+import { EnhancedMessage } from "@/components/ui/enhanced-message"
+import { PredefinedQuestion } from "@/lib/predefined-questions"
 
 export function ExpandableChatDemo() {
   const [input, setInput] = useState("")
+  const [showSuggestions, setShowSuggestions] = useState(true)
 
-  const { messages, sendMessage, status, setMessages } = useChat({
+  const { messages, sendMessage, status, error, setMessages } = useChat({
     messages: [
       {
         id: 'welcome',
@@ -30,11 +34,17 @@ export function ExpandableChatDemo() {
         parts: [
           {
             type: 'text',
-            text: "Hi! I'm REV.AI Copilot. I can help you analyze pricing recommendations, forecast demand, and optimize your revenue strategy. How can I assist you today?",
+            text: "Hi! I'm Rev-AI Clarity. I turn complex revenue data into simple, actionable insights. I can help you analyze pricing, forecast demand, and optimize your revenue strategy. What would you like to explore?",
           },
         ],
       },
     ],
+    onError: (err) => {
+      console.error('[Chat] Error occurred:', err)
+    },
+    onFinish: (result) => {
+      console.log('[Chat] Message finished:', result.message?.id)
+    },
   })
 
   const isLoading = status === 'streaming' || status === 'submitted'
@@ -47,14 +57,21 @@ export function ExpandableChatDemo() {
 
     sendMessage({ text: input })
     setInput("")
+    setShowSuggestions(false) // Hide suggestions after first message
+  }
+
+  const handleQuestionSelect = (question: PredefinedQuestion) => {
+    // Send the selected question as a message
+    sendMessage({ text: question.question })
+    setShowSuggestions(false) // Hide suggestions after selection
   }
 
   const handleAttachFile = () => {
-    //
+    // Placeholder for file attachment
   }
 
   const handleMicrophoneClick = () => {
-    //
+    // Placeholder for voice input
   }
 
   const handleClearConversation = () => {
@@ -66,11 +83,12 @@ export function ExpandableChatDemo() {
         parts: [
           {
             type: 'text',
-            text: "Hi! I'm REV.AI Copilot. I can help you analyze pricing recommendations, forecast demand, and optimize your revenue strategy. How can I assist you today?",
+            text: "Hi! I'm Rev-AI Clarity. I turn complex revenue data into simple, actionable insights. I can help you analyze pricing, forecast demand, and optimize your revenue strategy. What would you like to explore?",
           },
         ],
       },
     ])
+    setShowSuggestions(true) // Show suggestions again on reset
   }
 
   return (
@@ -90,9 +108,9 @@ export function ExpandableChatDemo() {
             <RobotIcon className="h-4 w-4" />
           </div>
           <div className="flex-1 text-left">
-            <h1 className="text-[17px] font-semibold tracking-tight">REV.AI Copilot</h1>
+            <h1 className="text-[17px] font-semibold tracking-tight">Rev-AI Clarity</h1>
             <p className="text-xs text-white/60 mt-0.5">
-              Ready to assist
+              Complex Data. Simple Answers.
             </p>
           </div>
           <Button
@@ -108,32 +126,70 @@ export function ExpandableChatDemo() {
 
         <ExpandableChatBody>
           <ChatMessageList>
+            {/* Show suggestion chips after welcome message */}
+            {showSuggestions && messages.length === 1 && (
+              <div className="px-4 py-2">
+                <SuggestionChips onQuestionSelect={handleQuestionSelect} />
+              </div>
+            )}
+
             {messages.map((message) => {
+              // Extract text from parts array (UIMessage format)
               const textContent = message.parts
-                .filter((part): part is Extract<typeof part, { type: 'text' }> => part.type === 'text')
-                .map(part => part.text)
-                .join('')
+                ?.filter((part): part is Extract<typeof part, { type: 'text' }> => part.type === 'text')
+                ?.map(part => part.text)
+                ?.join('') || ''
 
               const role = message.role as 'user' | 'assistant' | 'system'
               const variant = role === "user" ? "sent" as const : "received" as const
 
+              // Check if message contains chart data
+              const chartMatch = textContent.match(/<!--CHART_DATA:([\s\S]*?)-->/)
+              let chartData = null
+              let cleanText = textContent
+
+              if (chartMatch) {
+                try {
+                  chartData = JSON.parse(chartMatch[1])
+                  cleanText = textContent.replace(/<!--CHART_DATA:[\s\S]*?-->/, '').trim()
+                } catch (e) {
+                  console.error('Failed to parse chart data:', e)
+                }
+              }
+
               return (
-                <ChatBubble
-                  key={message.id}
-                  variant={variant}
-                >
+                <React.Fragment key={message.id}>
+                  <ChatBubble variant={variant}>
+                    {variant === "received" && (
+                      <ChatBubbleAvatar
+                        className="shrink-0"
+                        fallback="AI"
+                      />
+                    )}
+                    <ChatBubbleMessage
+                      variant={variant}
+                    >
+                      {variant === "received" && chartData ? (
+                        <EnhancedMessage
+                          content={cleanText}
+                          chartData={chartData.data}
+                        />
+                      ) : (
+                        cleanText
+                      )}
+                    </ChatBubbleMessage>
+                  </ChatBubble>
+
+                  {/* Show inline quick questions after each assistant message */}
                   {variant === "received" && (
-                    <ChatBubbleAvatar
-                      className="shrink-0"
-                      fallback="AI"
-                    />
+                    <div className="px-4 pb-2">
+                      <InlineSuggestionChips
+                        onQuestionSelect={handleQuestionSelect}
+                        limit={3}
+                      />
+                    </div>
                   )}
-                  <ChatBubbleMessage
-                    variant={variant}
-                  >
-                    {textContent}
-                  </ChatBubbleMessage>
-                </ChatBubble>
+                </React.Fragment>
               )
             })}
 
@@ -145,6 +201,28 @@ export function ExpandableChatDemo() {
                 />
                 <ChatBubbleMessage isLoading />
               </ChatBubble>
+            )}
+
+            {/* Error display */}
+            {error && (
+              <div className="mx-4 my-2 p-4 rounded-lg bg-red-50 border border-red-200 shadow-sm">
+                <p className="text-sm font-semibold text-red-800 mb-1">
+                  Failed to get response
+                </p>
+                <p className="text-xs text-red-600 mb-3">
+                  {error instanceof Error
+                    ? error.message
+                    : typeof error === 'object'
+                    ? JSON.stringify(error)
+                    : String(error)}
+                </p>
+                <button
+                  onClick={() => window.location.reload()}
+                  className="px-3 py-1.5 text-xs bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors"
+                >
+                  Reload Page
+                </button>
+              </div>
             )}
           </ChatMessageList>
         </ExpandableChatBody>
