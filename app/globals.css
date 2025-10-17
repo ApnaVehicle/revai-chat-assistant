@@ -1,0 +1,235 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 84% 4.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 210 40% 98%;
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 222.2 84% 4.9%;
+    --radius: 0.5rem;
+    --chart-1: 12 76% 61%;
+    --chart-2: 173 58% 39%;
+    --chart-3: 197 37% 24%;
+    --chart-4: 43 74% 66%;
+    --chart-5: 27 87% 67%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --chart-1: 220 70% 50%;
+    --chart-2: 160 60% 45%;
+    --chart-3: 30 80% 55%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 340 75% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Premium Chatbot Design System */
+@layer components {
+  /* Frosted Glass Effect */
+  .glass-effect {
+    backdrop-filter: blur(40px) saturate(180%);
+    background: rgba(248, 249, 252, 0.72);
+  }
+
+  .glass-dark {
+    backdrop-filter: blur(24px);
+    background: rgba(26, 29, 46, 0.88);
+  }
+
+  /* Premium Shadows */
+  .shadow-premium {
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.12),
+      0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  .shadow-button {
+    box-shadow:
+      0 8px 24px rgba(74, 95, 232, 0.20),
+      0 2px 8px rgba(0, 0, 0, 0.08),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2);
+  }
+
+  .shadow-message {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+  }
+
+  /* Premium Button Gradient */
+  .gradient-blue {
+    background: linear-gradient(135deg, #4A5FE8 0%, #6B7FF0 100%);
+  }
+
+  .gradient-mesh {
+    background: linear-gradient(135deg, #4A5FE8 0%, #7C3AED 100%);
+  }
+}
+
+/* Premium Animations */
+@layer utilities {
+  @keyframes fadeSlideUp {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  @keyframes chatOpen {
+    from {
+      opacity: 0;
+      transform: scale(0.95) translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
+  }
+
+  @keyframes gentleFloat {
+    0%, 100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-4px);
+    }
+  }
+
+  @keyframes typingDots {
+    0%, 60%, 100% {
+      transform: scale(0.8);
+      opacity: 0.5;
+    }
+    30% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
+  }
+
+  .animate-fade-slide-up {
+    animation: fadeSlideUp 280ms ease-out;
+  }
+
+  .animate-chat-open {
+    animation: chatOpen 320ms cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .animate-gentle-float {
+    animation: gentleFloat 3s ease-in-out infinite;
+  }
+
+  .animate-typing-dot-1 {
+    animation: typingDots 1.4s infinite;
+    animation-delay: 0s;
+  }
+
+  .animate-typing-dot-2 {
+    animation: typingDots 1.4s infinite;
+    animation-delay: 0.2s;
+  }
+
+  .animate-typing-dot-3 {
+    animation: typingDots 1.4s infinite;
+    animation-delay: 0.4s;
+  }
+}
+
+/* Markdown Content Styles */
+@layer components {
+  .markdown-content {
+    @apply text-[14.5px] leading-relaxed;
+  }
+
+  /* Ensure proper spacing between markdown elements */
+  .markdown-content > *:first-child {
+    @apply mt-0;
+  }
+
+  .markdown-content > *:last-child {
+    @apply mb-0;
+  }
+
+  /* Nested list spacing */
+  .markdown-content ul ul,
+  .markdown-content ol ol,
+  .markdown-content ul ol,
+  .markdown-content ol ul {
+    @apply mt-1.5 mb-0;
+  }
+
+  /* Code block container */
+  .markdown-content pre {
+    @apply my-3 rounded-lg overflow-hidden;
+  }
+
+  /* Inline code in lists */
+  .markdown-content li code {
+    @apply text-sm;
+  }
+
+  /* Link hover effects */
+  .markdown-content a {
+    @apply transition-colors duration-200;
+  }
+
+  /* Table responsiveness */
+  .markdown-content table {
+    @apply text-sm;
+  }
+}
